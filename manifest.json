@@ -1,0 +1,17 @@
+{
+    "name": "Bilibili-vedio-repeat",
+    "version": "1.0",
+    "manifest_version": 3,
+    "description": "bilibili(b站)视频片段重复播放，用于音乐、视频、音频片段重复播放",
+    "background": {
+      "service_worker": "service-worker.js"
+    },
+    "permissions": ["scripting", "webNavigation", "storage"],
+    "host_permissions": ["https://bilibili.com/*"],
+    "side_panel": {
+        "default_path": "sidepanel.html"
+      },
+      "action": {
+        "default_title": "Click to open panel"
+      }
+  }
