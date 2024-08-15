@@ -1,7 +1,8 @@
 import { Button, Input, Radio, Row, Space } from "antd/es"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 
 import "./style.css"
+
 import { log } from "console"
 
 function IndexSidePanel() {
@@ -10,49 +11,90 @@ function IndexSidePanel() {
   const [time, setTime] = useState("") // 0000 0023 0130 1023 表示间隔点为00:00 00:23 01:30 10:23
   const [currentIndex, setCurrentIndex] = useState(0)
 
-  const vedioRef = useRef();
-
   useEffect(() => {
-    chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-      if (request.action === "previous") {
-        if(currentIndex === 0) return;
-        postTime(currentIndex-1)
-      } else if (request.action === "next") {
-        if(currentIndex === data.length - 1) return;
-        postTime(currentIndex+1)
-      } else if (request.action === "currentTime") {
-        if(isCircle && data[currentIndex] - request.data < 0.2) {
-          postTime(currentIndex)
+    chrome.runtime.onMessage.addListener(
+      function (request, sender, sendResponse) {
+        if (request.action === "previous") {
+          log("previous")
+          if (currentIndex === 0) return
+          sendResponse({
+            currentTime: postTime(currentIndex - 1),
+            endTime: data[currentIndex]
+          })
+        } else if (request.action === "next") {
+          log("next")
+          if (currentIndex === data.length - 1) return
+          sendResponse({
+            currentTime: postTime(currentIndex + 1),
+            endTime: data[currentIndex + 2]
+          })
         }
       }
-    })
+    )
   }, [])
 
   const handleSubmit = () => {
     const timeArr = time.split(" ")
     setData(timeArr)
-    chrome.runtime.sendMessage({ action: "getVedio" }, (response) => {
-      console.log(response)
-      // 在这里处理 DOM 元素数据
-      vedioRef.current = response.domElement
-      log(response, 'responsole');
-    })
   }
 
   const postTime = (index) => {
-    if(vedioRef.current) {
-      setCurrentIndex(data[index])
-      // 设置开始时间
-      vedioRef.current.currentTime = formatTime(data[time]);
-      // 开始播放
-      vedioRef.current.play();
-    }
+    return formatTime(data[index])
   }
 
   const formatTime = (time) => {
-    const second = +time.slice(-2);
-    const min= +time.slice(0, -2);
-    return min * 60 + second;
+    console.log("time", time)
+    const second = +time.slice(-2)
+    const min = +time.slice(0, -2)
+    return min * 60 + second
+  }
+
+  const onChangeCircle = () => {
+    setIsCircle(!isCircle)
+    const tab = chrome.tabs.query(
+      { active: true, currentWindow: true },
+      (tabs) => {
+        const activeTab = tabs[0]
+        if (activeTab) {
+          chrome.tabs.sendMessage(
+            activeTab.id,
+            { action: "changeCircle", isCircle: !isCircle },
+            (response) => {
+              console.log("Background/script received response:", response)
+            }
+          )
+        }
+      }
+    )
+    // chrome.runtime.sendMessage({ action: "changeCircle", isCircle: !isCircle })
+  }
+
+  const resetCurrentTime = (index) => {
+    setCurrentIndex(index)
+    const tab = chrome.tabs.query(
+      { active: true, currentWindow: true },
+      (tabs) => {
+        const activeTab = tabs[0]
+        if (activeTab) {
+          chrome.tabs.sendMessage(
+            activeTab.id,
+            {
+              action: "resetCurrentTime",
+              currentTime: formatTime(data[index]),
+              endTime: formatTime(data[index + 1])
+            },
+            (response) => {
+              console.log("Background/script received response:", response)
+            }
+          )
+        }
+      }
+    )
+    chrome.runtime.sendMessage({
+      action: "resetCurrentTime",
+      currentTime: formatTime(data[index]),
+      endTime: formatTime(data[index + 1])
+    })
   }
 
   return (
@@ -71,7 +113,7 @@ function IndexSidePanel() {
       <Row justify="start" align="middle">
         <span className="pr-2">是否循环播放: </span>
         <Radio.Group
-          onChange={() => setIsCircle(!isCircle)}
+          onChange={onChangeCircle}
           value={isCircle}
           optionType="button"
           options={[
@@ -81,11 +123,11 @@ function IndexSidePanel() {
         />
       </Row>
       <Row justify="start" gutter={8}>
-        {data.map((time, index) => (
+        {data.slice(0, data.length - 1).map((time, index) => (
           <div className="mr-2" key={index}>
             <Button
               type={currentIndex === index ? "primary" : "default"}
-              onClick={() => postTime(index)}>
+              onClick={() => resetCurrentTime(index)}>
               {`第${index + 1}段`}
             </Button>
           </div>

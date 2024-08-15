@@ -1,65 +1,51 @@
-// window.addEventListener("DOMContentLoaded", () => {
-//   console.log(
-//     "You may find that having is not so pleasing a thing as wanting. This is not logical, but it is often true."
-//   )
-  // 获取dom元素
-//   chrome.runtime.onMessage.addListener(
-//     function (request, sender, sendResponse) {
-//       if (request.action === "getVedio") {
-//         console.log("1122")
-//         // 在这里处理 DOM 元素数据
-//         const vedioRef = document.getElementsByClassName(
-//           "bpx-player-video-wrap"
-//         )[0].children[0]
-//         sendResponse({ domElement: vedioRef })
-//       }
-//     }
-//   )
-//   // 快捷键监听
-//   // Shift + Left 上一段
-//   // Shift + Right 下一段
-//   window.addEventListener("keydown", function (event) {
-//     if (event.shiftKey && event.key === "ArrowLeft") {
-//       chrome.runtime.sendMessage({ action: "previous" })
-//     } else if (event.shiftKey && event.key === "ArrowRight") {
-//       chrome.runtime.sendMessage({ action: "next" })
-//     }
-//   })
-// })
-
+import { log } from "console"
 import type { PlasmoCSConfig } from "plasmo"
 
 export const config: PlasmoCSConfig = {
   matches: ["https://www.bilibili.com/*"]
 }
 
-window.addEventListener("load", () => {
-  console.log(
-    "You may find that having is not so pleasing a thing as wanting. This is not logical, but it is often true."
-  )
+let vedioDom = null
+let isCircle = false
+let endTime = 0
 
-  document.body.style.background = "pink"
-    // 获取dom元素
-  chrome.runtime.onMessage.addListener(
-    function (request, sender, sendResponse) {
-      if (request.action === "getVedio") {
-        console.log("1122")
-        // 在这里处理 DOM 元素数据
-        const vedioRef = document.getElementsByClassName(
-          "bpx-player-video-wrap"
-        )[0].children[0]
-        sendResponse({ domElement: vedioRef })
-      }
-    }
-  )
-  // 快捷键监听
-  // Shift + Left 上一段
-  // Shift + Right 下一段
-  window.addEventListener("keydown", function (event) {
-    if (event.shiftKey && event.key === "ArrowLeft") {
-      chrome.runtime.sendMessage({ action: "previous" })
-    } else if (event.shiftKey && event.key === "ArrowRight") {
-      chrome.runtime.sendMessage({ action: "next" })
-    }
-  })
+window.addEventListener("load", () => {
+  vedioDom = document.getElementsByClassName("bpx-player-video-wrap")[0]
+    .children[0] as HTMLVideoElement
+})
+
+// 快捷键监听
+// Shift + Left 上一段
+// Shift + Right 下一段
+window.addEventListener("keydown", function (event) {
+  if (event.shiftKey && event.key === "ArrowLeft") {
+    log("shift + left")
+    chrome.runtime.sendMessage({ action: "previous" }, (response) => {
+      endTime = response.endTime
+      vedioDom.currentTime = response.currentTime
+      vedioDom.play()
+    })
+  } else if (event.shiftKey && event.key === "ArrowRight") {
+    log("shift + right")
+    chrome.runtime.sendMessage({ action: "next" }, (response) => {
+      endTime = response.endTime
+      vedioDom.currentTime = response.currentTime
+      vedioDom.play()
+    })
+  }
+})
+
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  if (request.action === "resetCurrentTime") {
+    log("resetCurrentTime")
+    log("resetCurrentTime, data", request)
+    endTime = request.endTime
+    vedioDom.currentTime = request.currentTime
+    vedioDom.play()
+  }
+  if (request.action === "changeCircle") {
+    log("changeCircle")
+    log("changeCircle, data", request)
+    isCircle = request.isCircle
+  }
 })
