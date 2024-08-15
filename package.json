@@ -1,8 +1,0 @@
-{
-  "name": "Bilibili-vedio-repeat",
-  "version": "1.0.0",
-  "description": "bilibili(b站)视频片段重复播放，用于音乐、视频、音频片段重复播放",
-  "main": "index.js",
-  "author": "fangdada",
-  "license": "MIT"
-}
