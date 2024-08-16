@@ -30,7 +30,11 @@
   },
   "manifest": {
     "host_permissions": [
-      "https://*/*"
+      "https://www.bilibili.com/*"
+    ],
+    "permission": [
+      "contextMenus",
+      "scripting"
     ]
   }
 }
