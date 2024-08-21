@@ -1,15 +1,16 @@
+import React from "react"
 import { Button, Input, message, Radio, Row, Space } from "antd/es"
 import type { PlasmoCSConfig, PlasmoGetOverlayAnchor } from "plasmo"
 import { useEffect, useRef, useState } from "react"
+import "../style.css"
 
-import "./style.css"
+export const config: PlasmoCSConfig = {
+  matches: ["https://www.bilibili.com/video/*"],
+  all_frames: true,
+  world: "MAIN"
+}
 
-import React from "react"
-
-// export const config: PlasmoCSConfig = {
-//   matches: ["https://www.bilibili.com/*"]
-// }
-
+console.log('注入content成功')
 export const getOverlayAnchor: PlasmoGetOverlayAnchor = async () =>
   document.body
 const PlasmoPricingExtra = () => {
@@ -20,10 +21,23 @@ const PlasmoPricingExtra = () => {
   const vedioDomRef = useRef(null) as { current: HTMLVideoElement | null }
 
   useEffect(() => {
-    vedioDomRef.current = document.getElementsByClassName(
-      "bpx-player-video-wrap"
-    )[0].children[0] as HTMLVideoElement
+    chrome.runtime.onMessage.addListener(
+      function (request, sender, sendResponse) {
+        console.log('content收到信息')
+        if (request.action === "show") {
+          vedioDomRef.current = document.getElementsByClassName(
+            "bpx-player-video-wrap"
+          )[0].children[0] as HTMLVideoElement
+        }
+      }
+    )
   }, [])
+
+  // useEffect(() => {
+  //   vedioDomRef.current = document.getElementsByClassName(
+  //     "bpx-player-video-wrap"
+  //   )[0].children[0] as HTMLVideoElement
+  // }, [])
 
   useEffect(() => {
     if (vedioDomRef.current) {
@@ -46,20 +60,22 @@ const PlasmoPricingExtra = () => {
     // 快捷键监听
     // Shift + Left 上一段
     // Shift + Right 下一段
-    const len = data.length
-    window.addEventListener("keydown", function (event) {
-      if (event.shiftKey && event.key === "ArrowLeft") {
-        if (currentIndex === 0) return
-        setCurrentIndex(currentIndex - 1)
-      } else if (event.shiftKey && event.key === "ArrowRight") {
-        if (currentIndex === len - 1) return
-        setCurrentIndex(currentIndex + 1)
-      }
-    })
+    if(vedioDomRef.current) {
+      const len = data.length
+      window.addEventListener("keydown", function (event) {
+        if (event.shiftKey && event.key === "ArrowLeft") {
+          if (currentIndex === 0) return
+          setCurrentIndex(currentIndex - 1)
+        } else if (event.shiftKey && event.key === "ArrowRight") {
+          if (currentIndex === len - 1) return
+          setCurrentIndex(currentIndex + 1)
+        }
+      })
+    }
     return () => {
       window.removeEventListener("keydown", function (event) {})
     }
-  }, [data, currentIndex])
+  }, [data, currentIndex, vedioDomRef.current])
 
   useEffect(() => {
     const startTime = formatTime(data[currentIndex])
@@ -92,6 +108,7 @@ const PlasmoPricingExtra = () => {
   }
 
   return (
+    vedioDomRef.current ?
     <div
       style={{
         borderRadius: 4,
@@ -143,7 +160,7 @@ const PlasmoPricingExtra = () => {
           ))}
         </Row>
       </Space>
-    </div>
+    </div> : null
   )
 }
 

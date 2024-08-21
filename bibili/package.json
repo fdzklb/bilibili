@@ -30,11 +30,10 @@
   },
   "manifest": {
     "host_permissions": [
-      "https://www.bilibili.com/*"
+      "https://www.bilibili.com/video/*",
+      "https://www.bilibili.com/video/*",
+      "https://www.baidu.com//*"
     ],
-    "permission": [
-      "contextMenus",
-      "scripting"
-    ]
+    "permissions": ["scripting", "contextMenus"]
   }
 }
