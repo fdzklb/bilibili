@@ -33,17 +33,11 @@ import {
 import type { ModesTypes } from "@/contents/bilibili-subtitle"
 
 interface HeaderProps {
-  onSpeedChange: (speed: string) => void
-  onRepeatChange: (enabled: boolean, count: number) => void
-  repeatCount: number
   modes: ModesTypes
   setModes: (modes: ModesTypes) => void
 }
 
 const Header: React.FC<HeaderProps> = ({
-  onSpeedChange,
-  onRepeatChange,
-  repeatCount,
   modes,
   setModes
 }) => {

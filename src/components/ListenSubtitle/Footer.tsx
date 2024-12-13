@@ -13,11 +13,6 @@ import React, { useEffect, useRef, useState } from "react"
 import {
   RadioGroup,
   RadioGroupItem,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -26,13 +21,13 @@ import {
 import VideoProgress from "./VideoProgress"
 
 interface VideoProgressProps {
+  currentIndex: number
   duration: number // 视频总时长(秒)
   currentTime: number // 当前播放时间(秒)
-  onSeek: (time: number) => void // 拖动进度条时的回调函数
-  setIsPlaying: (isPlaying: boolean) => void
   isPlaying: boolean
-  handleSpeedChange: (value: string) => void
   repeatCount: number
+  dataLength: number
+  handleVideoChange: (type: 'playRate' | 'currentTime' | 'isPlaying', value: number | boolean) => void
   handleRepeatChange: (isRepeat: boolean, value: number) => void
   isRepeat: boolean
 }
@@ -40,14 +35,14 @@ interface VideoProgressProps {
 export default function Footer({
   duration,
   currentTime,
-  onSeek,
-  setIsPlaying,
   isRepeat,
   isPlaying,
-  repeatCount,
+  currentIndex,
+  dataLength,
   handleRepeatChange,
-  handleSpeedChange
+  handleVideoChange
 }: VideoProgressProps) {
+
   const [playSpeed, setPlaySpeed] = useState("1")
 
   const handleRepeat = () => {
@@ -60,8 +55,9 @@ export default function Footer({
 
   const handleSpeed = (value: string) => {
     setPlaySpeed(value)
-    handleSpeedChange(value)
+    handleVideoChange('playRate', parseFloat(value))
   }
+
 
   return (
     <div className="w-full h-full flex flex-col items-center">
@@ -69,7 +65,7 @@ export default function Footer({
         <VideoProgress
           duration={duration}
           currentTime={currentTime}
-          onSeek={onSeek}
+          onSeek={(time) => handleVideoChange('currentTime', time)}
         />
         <div className="flex items-center gap-3">
           {/* 时间显示 */}
@@ -102,7 +98,7 @@ export default function Footer({
             </button>
             {/* 上一段按钮 */}
             <button
-              onClick={() => onSeek(Math.max(0, currentTime - 5))}
+              onClick={() => currentIndex > 0 && handleVideoChange('currentTime', currentIndex - 1)}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
               <SkipBack
                 className="text-gray-600 hover:text-[#33CC33]"
@@ -113,7 +109,7 @@ export default function Footer({
 
             {/* 播放/暂停按钮 */}
             <button
-              onClick={() => setIsPlaying(!isPlaying)}
+              onClick={() => handleVideoChange('isPlaying', !isPlaying)}
               className="p-2 rounded-full hover:bg-gray-100">
               {isPlaying ? (
                 <Pause
@@ -132,7 +128,7 @@ export default function Footer({
 
             {/* 下一段按钮 */}
             <button
-              onClick={() => onSeek(Math.min(duration, currentTime + 5))}
+              onClick={() => currentIndex < dataLength - 1 && handleVideoChange('currentTime', currentIndex + 1)}
               className="p-2 rounded-full hover:bg-gray-100">
               <SkipForward
                 className="text-gray-800 hover:text-[#33CC33]"

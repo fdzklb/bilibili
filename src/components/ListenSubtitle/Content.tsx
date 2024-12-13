@@ -3,7 +3,7 @@ import type { ModesTypes } from "@/contents/bilibili-subtitle"
 import type { dataListTypes, dataTypes } from "@/lib/util/getSubtitle"
 import { cn } from "@/lib/utils"
 import { ArrowLeft, ArrowRight, Eye } from "lucide-react"
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState, useRef } from "react"
 import { FixedSizeList } from "react-window"
 import activeImage from "url:~assets/icons/active.gif"
 
@@ -15,8 +15,8 @@ interface ListenSubtitleCardProps {
   setData: (data: dataListTypes) => void
   isPlaying: boolean
   currentIndex: number
+  handleVideoChange: (type: 'playRate' | 'currentTime' | 'isPlaying', value: number | boolean) => void
   modes: ModesTypes
-  resetCurrentIndex: (index: number) => void
 }
 
 const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
@@ -24,7 +24,7 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
   data,
   isPlaying,
   currentIndex,
-  resetCurrentIndex,
+  handleVideoChange,
   setData,
   modes
 }) => {
@@ -51,6 +51,26 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
     setData(updateData)
   }
 
+  // 添加新的状态控制是否允许自动滚动
+  const [allowAutoScroll, setAllowAutoScroll] = useState(true);
+  // 用于存储定时器ID
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 处理用户交互后的自动滚动恢复
+  const handleUserInteraction = () => {
+    setAllowAutoScroll(false);
+    
+    // 清除之前的定时器
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    
+    // 设置新的定时器，5秒后恢复自动滚动
+    timerRef.current = setTimeout(() => {
+      setAllowAutoScroll(true);
+    }, 5000);
+  };
+
   // 渲染每一行的组件
   const Row = ({ index, style }) => (
     <div
@@ -58,7 +78,10 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
       className={`px-4 py-4 cursor-pointer hover:bg-gray-100 ${
         index === currentIndex ? "bg-blue-100" : ""
       }`}
-      onClick={() => resetCurrentIndex(index)}>
+      onClick={() => {
+        handleUserInteraction();
+        handleVideoChange('currentTime', index);
+      }}>
       <div className="flex items-center justify-between">
         <span className="text-gray-600">第 {index + 1} 句</span>
         {index === currentIndex && isPlaying ? (
@@ -74,7 +97,7 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
   )
 
   return (
-    <div>
+    <div className="h-full">
       {/* 左侧句子List */}
       <div className="absolute left-0 w-[200px] h-[calc(100%-180px)] border-r border-gray-200 bg-inherit py-2">
         <FixedSizeList
@@ -82,18 +105,15 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
           width={200}
           itemCount={totalLength}
           itemSize={56}
-          initialScrollOffset={currentIndex * 56} // 初始滚动位置
+          initialScrollOffset={currentIndex * 56}
+          onScroll={handleUserInteraction}
           ref={(list) => {
-            // 当currentIndex改变时,滚动到对应位置
-            if (list) {
-              // 获取可视区域的高度
+            // 只在允许自动滚动时执行滚动逻辑
+            if (list && allowAutoScroll) {
               const visibleHeight = window.innerHeight * 0.8 - 180
-              // 计算中点位置
               const midPoint = visibleHeight / 2
-              // 计算当前项的位置
               const itemPosition = currentIndex * 56
 
-              // 如果当前项在中点以下,则滚动到中间
               if (itemPosition > midPoint) {
                 list.scrollToItem(currentIndex, "center")
               }
@@ -103,20 +123,20 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
         </FixedSizeList>
       </div>
       {/* 右侧句子内容 */}
-      <div className="flex justify-between items-center ml-[200px] px-12">
+      <div className="flex justify-between items-center ml-[200px] px-12 h-full">
         <Button
           size="icon"
           className="rounded-full h-12 w-12"
           onClick={() => {
             if (currentIndex > 0) {
-              resetCurrentIndex(currentIndex - 1)
+              handleVideoChange('currentTime', currentIndex - 1)
             }
           }}
           disabled={currentIndex === 0}>
           <ArrowLeft />
         </Button>
         {/* 进度显示 */}
-        <div className="text-lg px-10 py-4 space-y-4 flex flex-col items-center">
+        <div className="text-lg px-10 py-4 space-y-4 flex flex-col justify-around h-full">
           <div className="text-center mb-4 text-gray-600">
             <span className="text-blue-500 text-2xl">{currentIndex + 1}</span> /{" "}
             {totalLength}
@@ -165,7 +185,7 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
                     }}>
                     <div className="px-4 flex items-center gap-1">
                       <Eye />
-                      点击显示译文
+                      点击显示示译文
                     </div>
                   </Button>
                 )}
@@ -205,7 +225,7 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
               <div>
                 <Textarea
                   className="w-[400px] min-h-[100px]"
-                  placeholder="请输入笔记内容..."
+                  placeholder="笔记..."
                   value={currentRowData?.noteContent || ""}
                   onChange={(e) =>
                     handleChange(currentIndex, "noteContent", e.target.value)
@@ -220,7 +240,7 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
           className="rounded-full h-12 w-12"
           onClick={() => {
             if (currentIndex < totalLength - 1) {
-              resetCurrentIndex(currentIndex + 1)
+              handleVideoChange('currentTime', currentIndex + 1)
             }
           }}
           disabled={currentIndex === totalLength - 1}>

@@ -12,7 +12,6 @@ export default function VideoProgress({ duration, currentTime, onSeek }: VideoPr
   // 将当前进度转换为百分比
   const progress = (currentTime / duration) * 100
 
-  // 处理进度条拖动
   const handleSliderChange = (value: number[]) => {
     const newTime = (value[0] / 100) * duration
     onSeek(newTime)
