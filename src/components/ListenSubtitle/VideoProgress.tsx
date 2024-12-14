@@ -24,7 +24,7 @@ export default function VideoProgress({ duration, currentTime, onSeek }: VideoPr
         value={[progress]}
         max={100}
         step={0.1}
-        onValueChange={handleSliderChange}
+        // onValueChange={handleSliderChange}
         className="cursor-pointer"
       />
     </div>

@@ -25,10 +25,9 @@ interface VideoProgressProps {
   duration: number // 视频总时长(秒)
   currentTime: number // 当前播放时间(秒)
   isPlaying: boolean
-  repeatCount: number
   dataLength: number
   handleVideoChange: (type: 'playRate' | 'currentTime' | 'isPlaying', value: number | boolean) => void
-  handleRepeatChange: (isRepeat: boolean, value: number) => void
+  setIsRepeat: (isRepeat: boolean) => void
   isRepeat: boolean
 }
 
@@ -39,19 +38,11 @@ export default function Footer({
   isPlaying,
   currentIndex,
   dataLength,
-  handleRepeatChange,
+  setIsRepeat,
   handleVideoChange
 }: VideoProgressProps) {
 
   const [playSpeed, setPlaySpeed] = useState("1")
-
-  const handleRepeat = () => {
-    if (isRepeat) {
-      handleRepeatChange(!isRepeat, 0)
-    } else {
-      handleRepeatChange(!isRepeat, 9999)
-    }
-  }
 
   const handleSpeed = (value: string) => {
     setPlaySpeed(value)
@@ -69,7 +60,7 @@ export default function Footer({
         />
         <div className="flex items-center gap-3">
           {/* 时间显示 */}
-          <span className="text-sm text-green-700">{formatTime(currentTime)}</span>
+          <span className="text-sm text-primary">{formatTime(currentTime)}</span>
           <span>/</span>
           <span className="text-sm">{formatTime(duration)}</span>
         </div>
@@ -79,15 +70,15 @@ export default function Footer({
           <div className="flex items-center gap-3">
             {/* 无限循环按钮 */}
             <button
-              onClick={handleRepeat}
+              onClick={() => setIsRepeat(!isRepeat)}
               className={`p-2 rounded-full hover:bg-gray-100 transition-colors duration-200`}>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     {isRepeat ? (
-                      <Repeat1 className={"w-5 h-5 hover:text-[#33CC33] text-gray-600"} />
+                      <Repeat1 className={"w-5 h-5 hover:text-primary text-gray-600"} />
                     ) : (
-                      <ListVideo className={"w-5 h-5 hover:text-[#33CC33] text-gray-600"} />
+                      <ListVideo className={"w-5 h-5 hover:text-primary text-gray-600"} />
                     )}
                   </TooltipTrigger>
                   <TooltipContent side="top" align="center" style={{ zIndex: 2147483647 }}>
@@ -101,7 +92,7 @@ export default function Footer({
               onClick={() => currentIndex > 0 && handleVideoChange('currentTime', currentIndex - 1)}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
               <SkipBack
-                className="text-gray-600 hover:text-[#33CC33]"
+                className="text-gray-600 hover:text-primary"
                 size={20}
                 strokeWidth={2.5}
               />
@@ -113,13 +104,13 @@ export default function Footer({
               className="p-2 rounded-full hover:bg-gray-100">
               {isPlaying ? (
                 <Pause
-                  className="text-gray-600 hover:text-[#33CC33]"
+                  className="text-gray-600 hover:text-primary"
                   size={20}
                   strokeWidth={2.5}
                 />
               ) : (
                 <Play
-                  className="text-gray-600 hover:text-[#33CC33]"
+                  className="text-gray-600 hover:text-primary"
                   size={20}
                   strokeWidth={2.5}
                 />
@@ -131,7 +122,7 @@ export default function Footer({
               onClick={() => currentIndex < dataLength - 1 && handleVideoChange('currentTime', currentIndex + 1)}
               className="p-2 rounded-full hover:bg-gray-100">
               <SkipForward
-                className="text-gray-800 hover:text-[#33CC33]"
+                className="text-gray-800 hover:text-primary"
                 size={20}
                 strokeWidth={2.5}
               />
@@ -145,7 +136,7 @@ export default function Footer({
             className="flex items-center gap-2"
             value={playSpeed}
             onValueChange={handleSpeed}>
-            {[0.75, 1, 1.5, 1.75, 2].map((speed) => (
+            {[0.5,0.75, 1, 1.5, 1.75, 2].map((speed) => (
               <div key={speed} className="flex items-center">
                 <RadioGroupItem
                   value={speed.toString()}

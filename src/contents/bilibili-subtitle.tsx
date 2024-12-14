@@ -10,6 +10,7 @@ import {
 import styleText from "data-text:@/global.css"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import React, { useCallback, useEffect, useRef, useState } from "react"
+import { createRoot } from 'react-dom/client'
 
 import "../global.css"
 
@@ -45,19 +46,19 @@ const BiliSubtitle = () => {
   const [data, setData] = useState<dataListTypes>([]) //字幕数据
   const [loading, setLoading] = useState(true) //加载状态
   const [isRepeat, setIsRepeat] = useState(false) //是否开启循环播放
-  const [repeatCount, setRepeatCount] = useState(99999) //循环播放次数 默认99999次
-  const [currentRepeatCount, setCurrentRepeatCount] = useState(0) //当前循环播放次数
   const [currentIndex, setCurrentIndex] = useState(0) //当前前字幕索引
   const [isPlaying, setIsPlaying] = useState(false) //视频播放状态 暂停/播放
   // 视频播放进度条
   const [currentTime, setCurrentTime] = useState(0) //当前视频时间
   const [duration, setDuration] = useState(0) //视频总时长
 
+  const videoRef = useRef<HTMLVideoElement>(null)
+
   // 头部操作按钮
   const [modes, setModes] = useState<ModesTypes>({
-    listenWriteMode: false, // 是否开启听写模式
+    listenWriteMode: true, // 是否开启听写模式
     noteMode: false, // 是否开启笔记模式
-    showRaw: false, // 是否显示原文
+    showRaw: true, // 是否显示原文
     showTranslate: false // 是否显示译文
   })
 
@@ -71,14 +72,14 @@ const BiliSubtitle = () => {
       }
     })
     setData(newData)
-  }, [modes.showRaw, modes.showTranslate])
+  }, [data.length, modes.showRaw, modes.showTranslate])
 
-  // 获取视频元素
-  const getVideoElement = useCallback(() => {
+  useEffect(() => {
     if (data.length === 0) return
-    const videoWrap = document.querySelector(".bpx-player-video-wrap")
-    const video = videoWrap?.querySelector("video")
-    return video
+    const video = document
+      .querySelector(".bpx-player-video-wrap")
+      ?.querySelector("video")
+    videoRef.current = video
   }, [data.length])
 
   // 获取字幕数据
@@ -86,7 +87,7 @@ const BiliSubtitle = () => {
     const getSubtitles = async () => {
       setLoading(true)
       const data = await getSubtitle(location)
-      const formatData: dataListTypes = formatSubtitleData(data)
+      const formatData: dataListTypes = formatSubtitleData(data, 6)
       setData(formatData)
       setLoading(false)
     }
@@ -95,127 +96,123 @@ const BiliSubtitle = () => {
 
   // 监听视频播放状态变化
   useEffect(() => {
-    const video = getVideoElement()
-    if (!video || data.length === 0) return
+    if (!videoRef.current || data.length === 0) return
+    // 设置视频总时长
+    setDuration(videoRef.current?.duration || 0)
 
     // 监听视频播放状态 暂停|播放
     const handlePlay = () => setIsPlaying(true)
     const handlePause = () => setIsPlaying(false)
     // 添加事件监听
-    video.addEventListener("play", handlePlay)
-    video.addEventListener("pause", handlePause)
+    videoRef.current.addEventListener("play", handlePlay)
+    videoRef.current.addEventListener("pause", handlePause)
 
-    // 监听视频时间进度
     const handleTimeUpdate = () => {
-      if (isPlaying) { //如果正在播放
-        const currentTime = video.currentTime
-        const index = data.findIndex((subtitle) =>
-          subtitle.from <= currentTime && subtitle.to >= currentTime
-        )
-        if (index === -1) {
+      if (!isPlaying) return
+      //如果正在播放
+      const currentTime = videoRef.current.currentTime
+      if (isRepeat) {
+        // 如果开启了循环播放
+        const currentSubtitle = data[currentIndex]
+        if (currentTime > currentSubtitle.to - 0.1) {
+          videoRef.current.currentTime = currentSubtitle.from
+          setCurrentTime(videoRef.current.currentTime)
           return
-        } else {
+        }
+      } else {
+        // 如果未开启循环播放
+        const index = data.findIndex(
+          (subtitle) =>
+            subtitle.from <= currentTime && subtitle.to >= currentTime
+        )
+        if (index !== -1) {
           setCurrentIndex(index)
           setCurrentTime(currentTime)
-          setDuration(video.duration)
         }
       }
     }
-    video.addEventListener("timeupdate", handleTimeUpdate)
-
+    videoRef.current.addEventListener("timeupdate", handleTimeUpdate)
     // 清理事件监听
     return () => {
-      video.removeEventListener("play", handlePlay)
-      video.removeEventListener("pause", handlePause)
-      video.removeEventListener("timeupdate", handleTimeUpdate)
+      videoRef.current?.removeEventListener("play", handlePlay)
+      videoRef.current?.removeEventListener("pause", handlePause)
+      videoRef.current?.removeEventListener("timeupdate", handleTimeUpdate)
     }
-  }, [getVideoElement, data.length, isPlaying])
+  }, [videoRef.current, data.length, isPlaying, isRepeat, currentIndex])
 
-  const handleVideoChange = useCallback(
-    (
-      type: "playRate" | "currentTime" | "isPlaying",
-      value: number | boolean
-    ) => {
-      const video = getVideoElement()
-      if (video) {
-        if (type === "playRate") {
-          video.playbackRate = value as number
-        } else if (type === "currentTime") {
-          const currentTime = data[value as number].from + 0.1
-          video.currentTime = currentTime
-          setCurrentIndex(value as number)
-        } else if (type === "isPlaying") {
-          if (value) {
-            video.play()
-          } else {
-            video.pause()
-          }
+
+  const handleVideoChange = (
+    type: "playRate" | "currentTime" | "isPlaying",
+    value: number | boolean
+  ) => {
+    if (videoRef.current) {
+      if (type === "playRate") {
+        videoRef.current.playbackRate = value as number
+      } else if (type === "currentTime") {
+        const currentTime = data[value as number].from + 0.05
+        videoRef.current.currentTime = currentTime
+        setCurrentIndex(value as number)
+      } else if (type === "isPlaying") {
+        if (value) {
+          videoRef.current.play()
+        } else {
+          videoRef.current.pause()
         }
       }
-    },
-    [data.length, getVideoElement, currentIndex]
-  )
+    }
+  }
 
-  // 处理循环播放
-  const handleRepeatChange = useCallback((enabled: boolean, count: number) => {
-    setIsRepeat(enabled)
-    setRepeatCount(count)
-    setCurrentRepeatCount(0)
-  }, [])
-
-  // // 处理循环播放
   // useEffect(() => {
-  //   const video = getVideoElement()
-  //   if (!video) return
+  //   // 在 Shadow DOM 内部处理键盘事件
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     const keysToPrevent = [
+  //       'Space',
+  //       'ArrowLeft',
+  //       'ArrowRight',
+  //       'ArrowUp',
+  //       'ArrowDown',
+  //       'Shift'
+  //     ]
 
-  //   // 如果字幕数据为空，则不进行任何操作
-  //   if (!data.length) return
-  //   // 如果未开启循环播放，
-  //   if (!isRepeat) {
-  //     // 遍历字幕数组找到当前时间对应的字幕索引
-  //     const newIndex = data.findIndex(
-  //       (subtitle) => currentTime >= subtitle.from && currentTime <= subtitle.to
-  //     )
-  //     // 如果找到对应字幕且索引不同,则更新currentIndex
-  //     if (newIndex !== -1 && newIndex !== currentIndex) {
-  //       setCurrentIndex(newIndex)
+  //     // 检查事件目标是否是输入框
+  //     const isInputElement = (e.target as HTMLElement).tagName.toLowerCase() === 'input' 
+  //       || (e.target as HTMLElement).tagName.toLowerCase() === 'textarea'
+  //       || (e.target as HTMLElement).getAttribute('contenteditable') === 'true'
+
+  //     // 如果是输入框，则不阻止事件
+  //     if (isInputElement) {
+  //       return
   //     }
-  //   } else {
-  //     // 如果开启循环播放
-  //     const currentSubtitle = data[currentIndex]
-  //     // 如果超出当前字幕时间范围
-  //     if (currentTime > currentSubtitle.to) {
-  //       if (currentRepeatCount < repeatCount - 1) {
-  //         // 还没达到重复次数,跳回字幕开始处
-  //         resetCurrentIndex(currentIndex)
-  //         setCurrentRepeatCount((prev) => prev + 1)
-  //       } else {
-  //         // 达到重复次数,重置计数并进入下一句
-  //         setCurrentRepeatCount(0)
-  //         // 检查是否是最后一句字幕
-  //         if (currentIndex === data.length - 1) {
-  //           setIsPlaying(false) // 如果是最后一句则暂停视频
-  //         } else {
-  //           // 不是最后一句,则跳到下一句
-  //           setCurrentIndex((prev) => prev + 1)
-  //         }
-  //       }
+
+  //     // 只有在不是输入框的情况下才阻止事件
+  //     if (keysToPrevent.includes(e.code)) {
+  //       e.stopPropagation()
+  //       e.preventDefault()
   //     }
   //   }
-  // }, [
-  //   currentTime,
-  //   isRepeat,
-  //   repeatCount,
-  //   currentRepeatCount,
-  //   data.length,
-  //   currentIndex
-  // ])
+
+  //   // 获取当前 Shadow Root
+  //   const shadowRoot = document.getElementById('bilibili-subtitle-root')?.shadowRoot
+  //   if (shadowRoot) {
+  //     shadowRoot.addEventListener('keydown', handleKeyDown, true)
+  //     shadowRoot.addEventListener('keyup', handleKeyDown, true)
+  //     shadowRoot.addEventListener('keypress', handleKeyDown, true)
+  //   }
+
+  //   return () => {
+  //     if (shadowRoot) {
+  //       shadowRoot.removeEventListener('keydown', handleKeyDown, true)
+  //       shadowRoot.removeEventListener('keyup', handleKeyDown, true)
+  //       shadowRoot.removeEventListener('keypress', handleKeyDown, true)
+  //     }
+  //   }
+  // }, [])
 
   return (
-    <div className="fixed top-16 right-0 flex flex-col gap-2 w-[80vw] h-[80vh] bg-[#FFFFF5] rounded-lg shadow-xl">
+    <div className="fixed top-16 right-0 flex flex-col gap-2 w-[80vw] h-[calc(100vh-64px)] bg-[#FFFFF4] rounded-lg shadow-xl">
       {/* 头部操作区域 */}
       <Header modes={modes} setModes={setModes} />
-      <div className="h-[calc(100%-160px)]">
+      <div className="h-[calc(100%-80px-64px-64px)]">
         {/* 中间句子List和句子内容 */}
         <Content
           loading={loading}
@@ -236,9 +233,8 @@ const BiliSubtitle = () => {
           currentTime={currentTime}
           handleVideoChange={handleVideoChange}
           isPlaying={isPlaying}
-          repeatCount={repeatCount}
           isRepeat={isRepeat}
-          handleRepeatChange={handleRepeatChange}
+          setIsRepeat={setIsRepeat}
         />
       </div>
     </div>
