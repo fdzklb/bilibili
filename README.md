@@ -1,33 +1,88 @@
-This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
+# 视频网站字幕提取浏览器插件
 
-## Getting Started
+一个强大的 Chrome 浏览器扩展，结合AI的强大翻译功能和视频处理能力，为非母语者提供强大的翻译功能，为语言学习者提供多功能语言学习笔记等功能。使用 TypeScript、React、Plasmo、Tailwind CSS 和 Shadcn UI 组件构建。
 
-First, run the development server:
+## 🌟 主要功能
 
-```bash
-pnpm dev
-# or
-npm run dev
-```
+- 💬 AI 智能翻译
+- 🎨 基于 Shadcn 组件的现代化 UI 设计
+- 🌓 深色/浅色主题切换
+- 💾 视频字幕提取下载
+- ⚡ 弹出窗口快速访问
+- 🔒 笔记+翻译导出
+- 📋 视频内容内容分析与总结
+- 🔍 智能搜索建议
 
-Open your browser and load the appropriate development build. For example, if you are developing for the chrome browser, using manifest v3, use: `build/chrome-mv3-dev`.
+## 🛠️ 技术栈
 
-You can start editing the popup by modifying `popup.tsx`. It should auto-update as you make changes. To add an options page, simply add a `options.tsx` file to the root of the project, with a react component default exported. Likewise to add a content page, add a `content.ts` file to the root of the project, importing some module and do some logic, then reload the extension on your browser.
+- **框架:** React + TypeScript
+- **扩展框架:** Plasmo
+- **样式:** Tailwind CSS
+- **UI 组件:** Shadcn UI
+- **图标:** Lucide React
 
-For further guidance, [visit our Documentation](https://docs.plasmo.com/)
+## 📁 项目结构
 
-## Making production build
+├── src/
+│ ├── background/ # 后台脚本
+│ ├── components/ # React 组件
+│ │ ├── ListenSubtitle/ # 听写+笔记页面
+│ ├── hooks/ # 自定义 React Hooks
+│ ├── lib/ # 工具函数库
+│ ├── contents/ # content script内容脚本
+│ │ ├── ListenSubtitle/ # 针对bilibili视频的听写+笔记页面脚本
+│ ├── popup/ # 弹出窗口
+│ ├── options/ # 选项页面
+│ ├── sidepanel/ # 侧边栏
+│ ├── global.css # 全局样式
+├── assets/ # 静态资源
+└── package.json # 项目配置文件
+└── tailwind.config.ts # tailwind配置文件
+└── tsconfig.json # tsconfig配置文件
 
-Run the following:
 
-```bash
-pnpm build
-# or
-npm run build
-```
 
-This should create a production bundle for your extension, ready to be zipped and published to the stores.
+## 🚀 主要功能说明
 
-## Submit to the webstores
+### 1. 字幕同步卡片
+- 实时同步字幕和视频进度
+- 实时翻译视频人物对话或语音
+- AI智能总结视频内容
+- 字幕多格式下载导出
+- 字幕上传
 
-The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
+
+### 2. 精听弹窗(针对语言学习者)
+- 控制视频片段播放速度、循环播放
+- 支持听写语音内容
+- 实时校验听写内容
+- 支持笔记
+- 支持导出字幕+笔记
+
+### 3. 支持多网站
+- bilibili
+- youtube
+- 奈飞
+- 其他网站
+
+## 📝 使用说明
+
+1. 在 Chrome 网上应用店安装插件
+2. 点击浏览器工具栏中的插件图标展示字幕同步卡片
+3. 点击鼠标右键弹出后点击“去精听”打开精听弹窗
+4. 打开选项页设置主题、字体等
+
+## 🔒 隐私说明
+
+- 所有对话数据仅存储在本地
+- 不收集用户个人信息
+- API 调用采用加密传输
+- 用户可随时清除所有数据
+
+## 🤝 贡献指南
+
+欢迎提交 Issue 和 Pull Request 来帮助改进项目。
+
+## 📄 许可证
+
+MIT License - 详见 LICENSE 文件
