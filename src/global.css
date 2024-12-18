@@ -4,89 +4,89 @@
 
 @layer base {
   :root {
-    --background: 60 100% 95%;
+    --background: 60 100% 96%;
     --foreground: 0 0% 20%;
 
-    --muted: 60 100% 85%;
-    --muted-foreground: 0 0% 20%;
+    --muted: 60 100% 98%;
+    --muted-foreground: 0 0% 40%;
 
-    --popover: 60 100% 98%;
+    --popover: 255 100% 98%;
     --popover-foreground: 0 0% 20%;
 
-    --border: 45 100% 70%;
+    --border: 0 0% 80%;
     --input: 0 0% 80%;
 
-    --card: 60 100% 90%;
-    --card-foreground: 0 0% 10%;
+    --card: 255 100% 98%;
+    --card-foreground: 0 0% 15%;
 
-    --primary: 36 100% 50%;
+    --primary: 120 70% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 100% 70%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 340 60% 70%;
+    --secondary-foreground: 0 0% 20%;
 
-    --accent: 120 60% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 50 100% 80%;
+    --accent-foreground: 0 0% 20%;
 
-    --destructive: 0 100% 50%;
+    --destructive: 0 80% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --ring: 36 100% 50%;
+    --ring: 120 70% 60%;
 
     --radius: 0.5rem;
 
-    --chart-1: 36 100% 50%;
+    --chart-1: 120 70% 70%;
 
-    --chart-2: 45 100% 70%;
+    --chart-2: 340 60% 80%;
 
-    --chart-3: 120 60% 50%;
+    --chart-3: 50 100% 90%;
 
-    --chart-4: 0 100% 50%;
+    --chart-4: 60 100% 40%;
 
-    --chart-5: 30 100% 60%;
+    --chart-5: 230 70% 60%;
   }
 
   .dark {
-    --background: 0 0% 10%;
-    --foreground: 0 0% 90%;
+    --background: 0 0% 20%;
+    --foreground: 0 0% 100%;
 
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 90%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 120 40% 40%;
+    --accent: 50 80% 60%;
     --accent-foreground: 0 0% 90%;
 
-    --popover: 0 0% 15%;
-    --popover-foreground: 0 0% 90%;
+    --popover: 0 0% 25%;
+    --popover-foreground: 0 0% 85%;
 
-    --border: 0 0% 30%;
-    --input: 0 0% 20%;
+    --border: 0 0% 50%;
+    --input: 0 0% 30%;
 
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 90%;
+    --card: 0 0% 25%;
+    --card-foreground: 0 0% 85%;
 
-    --primary: 36 100% 60%;
-    --primary-foreground: 0 0% 10%;
+    --primary: 120 70% 40%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 100% 50%;
-    --secondary-foreground: 0 0% 90%;
+    --secondary: 340 60% 60%;
+    --secondary-foreground: 0 0% 95%;
 
-    --destructive: 0 100% 60%;
-    --destructive-foreground: 0 0% 10%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --ring: 36 100% 60%;
+    --ring: 60 100% 40%;
 
     --radius: 0.5rem;
 
-    --chart-1: 36 100% 60%;
+    --chart-1: 120 70% 60%;
 
-    --chart-2: 45 100% 50%;
+    --chart-2: 340 60% 70%;
 
-    --chart-3: 120 40% 40%;
+    --chart-3: 50 70% 50%;
 
-    --chart-4: 0 100% 60%;
+    --chart-4: 60 70% 50%;
 
-    --chart-5: 30 100% 50%;
+    --chart-5: 230 70% 70%;
   }
 }
 

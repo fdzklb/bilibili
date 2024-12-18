@@ -82,7 +82,7 @@ export default function Footer({
                     )}
                   </TooltipTrigger>
                   <TooltipContent side="top" align="center" style={{ zIndex: 2147483647 }}>
-                    切换播放模式
+                    是否循环播放
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

@@ -122,7 +122,7 @@ export type dataTypes = {
 export type dataListTypes = dataTypes[]
 // 格式化字幕数据
 export function formatSubtitleData(data: rawDataTypes, timePerid: number = 8): dataListTypes {
-  const { all_subtitles = [], author, title } = data
+  const { all_subtitles = [] } = data
   const [arr1, arr2] = all_subtitles
   const translateArr = arr2?.body || []
   const rawArr = arr1?.body || []

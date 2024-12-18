@@ -25,7 +25,12 @@
     "@radix-ui/react-tooltip": "^1.1.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "docxtemplater": "^3.55.6",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
+    "jszip-utils": "^0.1.0",
     "lucide-react": "^0.468.0",
+    "pizzip": "^3.1.7",
     "plasmo": "0.88.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -51,6 +56,16 @@
   "manifest": {
     "host_permissions": [
       "https://www.bilibili.com/video/*"
+    ],
+    "web_accessible_resources": [
+      {
+        "resources": [
+          "assets/template.docx"
+        ],
+        "matches": [
+          "*://*.bilibili.com/*"
+        ]
+      }
     ],
     "permissions": [
       "scripting",

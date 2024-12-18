@@ -2,15 +2,18 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "biliSubtitle",
     title: "去精听",
-    contexts: ["all"],
+    contexts: ["page"],
     documentUrlPatterns: ["https://www.bilibili.com/video/*"]
   })
 })
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  chrome.tabs.create({
-    url: "chrome-extension://" + tab.id + "/contents/bilibili-subtitle.html"
-  })
+  if (info.menuItemId === "biliSubtitle" && tab?.id) {
+    // 向当前标签页发送开启精听的消息
+    chrome.tabs.sendMessage(tab.id, {
+      action: "openListenSubtitle"
+    })
+  }
 })
 
 // chrome.commands.onCommand.addListener((command) => {

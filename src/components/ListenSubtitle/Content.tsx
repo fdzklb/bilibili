@@ -1,8 +1,6 @@
 import { Button, Input, Textarea } from "@/components/ui"
-import type { ModesTypes } from "@/contents/bilibili-subtitle"
-import { toast, useToast } from "@/lib/hooks/use-toast"
+import type { ModesTypes } from "./index"
 import type { dataListTypes, dataTypes } from "@/lib/util/getSubtitle"
-import { cn } from "@/lib/utils"
 import { ArrowLeft, ArrowRight, Copy, Eye, EyeOff } from "lucide-react"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { FixedSizeList } from "react-window"
@@ -128,27 +126,39 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
     <div className="h-full">
       {/* 左侧句子List */}
       <div className="absolute left-0 w-[200px] h-[calc(100%-80px-64px-64px)] border-r border-gray-200 bg-inherit py-2">
-        <FixedSizeList
-          height={window.innerHeight - 80 - 64 - 64 - 80}
-          width={200}
-          itemCount={totalLength}
-          itemSize={56}
-          initialScrollOffset={currentIndex * 56}
-          onScroll={handleUserInteraction}
-          ref={(list) => {
-            // 只在允许自动滚动时执行滚动逻辑
-            if (list && allowAutoScroll) {
-              const visibleHeight = window.innerHeight - 80 - 64 - 64 - 80
-              const midPoint = visibleHeight / 2
-              const itemPosition = currentIndex * 56
+        {loading ? (
+          // 加载中显示骨架屏
+          <div className="space-y-4 p-4">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between animate-pulse">
+                <div className="h-4 w-24 bg-gray-200 rounded"></div>
+                <div className="h-4 w-4 bg-gray-200 rounded-full"></div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <FixedSizeList
+            height={window.innerHeight - 80 - 64 - 64 - 80}
+            width={200}
+            itemCount={totalLength}
+            itemSize={56}
+            initialScrollOffset={currentIndex * 56}
+            onScroll={handleUserInteraction}
+            ref={(list) => {
+              // 只在允许自动滚动时执行滚动逻辑
+              if (list && allowAutoScroll) {
+                const visibleHeight = window.innerHeight - 80 - 64 - 64 - 80
+                const midPoint = visibleHeight / 2
+                const itemPosition = currentIndex * 56
 
-              if (itemPosition > midPoint) {
-                list.scrollToItem(currentIndex, "center")
+                if (itemPosition > midPoint) {
+                  list.scrollToItem(currentIndex, "center")
+                }
               }
-            }
-          }}>
-          {Row}
-        </FixedSizeList>
+            }}>
+            {Row}
+          </FixedSizeList>
+        )}
       </div>
       {/* 右侧句子内容 */}
       <div className="flex justify-between items-center ml-[200px] px-12 h-full">

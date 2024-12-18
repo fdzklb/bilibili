@@ -7,6 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from "@/components/ui"
+import { cn, exportWordDocx } from "@/lib/utils"
 import {
   DropdownMenu,
   DropdownMenuTrigger
@@ -17,8 +18,7 @@ import {
   ArrowRight,
   ArrowUp,
   Download,
-  PauseCircle,
-  Repeat,
+  Minimize2,
   Settings
 } from "lucide-react"
 import React, { useEffect, useState } from "react"
@@ -30,17 +30,21 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger
 } from "../ui/dropdown-menu"
-import type { ModesTypes } from "@/contents/bilibili-subtitle"
+import type { ModesTypes } from "./index"
 
 interface HeaderProps {
   modes: ModesTypes
   setModes: (modes: ModesTypes) => void
+  setShowCard: (showCard: boolean) => void
+  handleDownload: (type: DownloadType, docType: string) => void
 }
 
-const Header: React.FC<HeaderProps> = ({
-  modes,
-  setModes
-}) => {
+export type DownloadType = "raw" | "translate" | "raw+translate" | "raw+note" | "translate+note" | "raw+translate+note"
+
+
+
+const Header: React.FC<HeaderProps> = ({ modes, setModes, setShowCard, handleDownload }) => {
+
   return (
     <div className="backdrop-blur-sm shadow-sm p-4 border-b border-gray-200">
       <div className="flex items-center justify-between gap-4">
@@ -49,14 +53,19 @@ const Header: React.FC<HeaderProps> = ({
 
         {/* 侧控制组 */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 pr-6">
             {[
               { value: "showRaw", title: "原文" },
               { value: "showTranslate", title: "译文" },
               { value: "listenWriteMode", title: "听写模式" },
               { value: "noteMode", title: "笔记模式" }
-            ].map((mode) => (
-              <div key={mode.value} className="flex items-center gap-2">
+            ].map((mode, index) => (
+              <div
+                key={mode.value}
+                className={cn(
+                  "flex items-center gap-2",
+                  index === 1 && "border-r border-gray-200 pr-6"
+                )}>
                 <label
                   htmlFor={mode.value}
                   className="text-sm font-medium text-gray-700">
@@ -65,13 +74,15 @@ const Header: React.FC<HeaderProps> = ({
                 <Switch
                   id={mode.value}
                   checked={modes[mode.value]}
-                  onCheckedChange={() => setModes({ ...modes, [mode.value]: !modes[mode.value] })}
+                  onCheckedChange={() =>
+                    setModes({ ...modes, [mode.value]: !modes[mode.value] })
+                  }
                   className="data-[state=checked]:bg-primary"
                 />
               </div>
             ))}
           </div>
-          <TooltipProvider>
+          {/* <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button className="hover:bg-gray-200/50 p-2 rounded cursor-pointer">
@@ -108,25 +119,59 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
-
+          </TooltipProvider> */}
+        </div>
+        <div className="flex items-center gap-4">
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-md hover:bg-gray-50">
-              <Download className="h-4 w-4" />
+            <DropdownMenuTrigger>
+              <Button className="h-6">
+                <span>下载</span>
+                <Download className="h-4 w-4" />
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent style={{ zIndex: 2147483647 }}>
-              {["原文", "译文", "原文+译文", "原文+译文+笔记"].map((type) => (
-                <DropdownMenuSub key={type}>
-                  <DropdownMenuSubTrigger>{type}</DropdownMenuSubTrigger>
+              {[
+                { title: "原文", value: "raw" },
+                { title: "译文", value: "translate" },
+                { title: "原文+译文", value: "raw+translate" },
+                { title: "原文+笔记", value: "raw+note" },
+                { title: "译文+笔记", value: "translate+note" },
+                { title: "原文+译文+笔记", value: "raw+translate+note" }
+              ].map((type) => (
+                <DropdownMenuSub key={type.value}>
+                  <DropdownMenuSubTrigger>{type.title}</DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
-                    {["PDF", "DOC", "SRT"].map((format) => (
-                      <DropdownMenuItem key={format}>{format}</DropdownMenuItem>
+                    {["PDF", "DOC", "vtt/srt"].map((docType) => (
+                      <DropdownMenuItem
+                        key={docType}
+                        onClick={() => handleDownload(type.value as DownloadType, docType)}>
+                        {docType}
+                      </DropdownMenuItem>
                     ))}
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  onClick={() => setShowCard(false)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-primary/80 cursor-pointer"
+                  title="收起">
+                  <Minimize2 className="h-4 w-4" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                align="end"
+                sideOffset={5}
+                style={{ zIndex: 2147483647 }}>
+                收起
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
     </div>
