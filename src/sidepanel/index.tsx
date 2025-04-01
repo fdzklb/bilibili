@@ -1,49 +1,15 @@
-import type {
-    PlasmoCSConfig,
-    PlasmoCSUIJSXContainer,
-    PlasmoRender,
-    PlasmoGetStyle,
-    PlasmoGetOverlayAnchor
-  } from "plasmo"
-  import React, { useEffect, useState } from "react"
-  
-  import ListenSubtitleCard from "@/components/ListenCard"
-  import { fetchSubtitles, getAidOrBvid } from "@/lib/util/getSubtitle"
-  import "../global.css"
-  import { Button } from "@/components/ui"
+import React from "react"
+import "../global.css"
   
   
-  // 获取字幕数据的函数
-  const getSubtitle = async (location: Location) => {
-    const aidOrBvid = await getAidOrBvid(location)
-    const subtitles = await fetchSubtitles(aidOrBvid)
-    return subtitles
-  }
-  
-  // 主组件
-  const BiliSubtitle = () => {
-    const [data, setData] = useState<any>({})
-    const [loading, setLoading] = useState(true)
-  
-    // useEffect(() => {
-    //   const getSubtitles = async () => {
-    //     setLoading(true)
-    //     const data = await getSubtitle(location)
-    //     setData(data)
-    //     setLoading(false)
-    //   }
-    //   getSubtitles()
-    // }, [])
-  
+  const Index = () => {
     return (
-      
-        <div className="fixed top-16 right-0 hw-top">
-          {/* <ListenSubtitleCard loading={loading} data={data} /> */}
-          <Button>1233</Button>
+        <div>
+          这是侧边栏
         </div>
     )
   }
   
   
-  export default BiliSubtitle
+  export default Index
   

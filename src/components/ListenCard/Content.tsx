@@ -38,19 +38,19 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
 }) => {
   // 添加新的状态控制是否允许自动滚动
   const [allowAutoScroll, setAllowAutoScroll] = useState(true)
-  const [focusIndex, setFocusIndex] = useState(null)
+  const [focusIndex, setFocusIndex] = useState(null) // 记录默写模式下的当前鼠标聚焦索引
 
   // 用于存储定时器ID
   const timerRef = useRef<NodeJS.Timeout | null>(null)
-  const currentRowData: dataTypes = data[currentIndex]
-  const totalLength = data.length
+  const currentRowData: dataTypes = data[currentIndex] //当前一句字幕数据
+
+  const totalLength = data.length // 视频字幕片段总数
   const { listenWriteMode, noteMode } = modes
-  // const currentRawArr = currentRowData?.translateContent ? currentRowData?.translateContent?.split(" ") : []
   const currentRawArr = currentRowData?.content
     ? currentRowData?.content?.split(" ")
     : []
-    console.log(currentRowData)
-  // 监听 Shift+ArrowLeft 快捷键
+    
+  // 监听 Shift+ArrowLeft ArrowRight 快捷键
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.shiftKey && e.code === "ArrowLeft") {
@@ -189,7 +189,6 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
           <div className="flex flex-col items-center space-y-4">
             {/* 原文部分 */}
             <div className="">
-              {/* 固定高度 */}
               <div
                 className="pl-4"
                 onClick={(e) => {
@@ -219,7 +218,6 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
 
             {/* 译文部分 */}
             <div className="">
-              {/* 固定高度 */}
               <div
                 className="pl-4"
                 onClick={(e) => {
@@ -252,7 +250,7 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
               </div>
             </div>
           </div>
-          {/* 用户输入区域 */}
+          {/* 听写输入区域 */}
           {listenWriteMode ? (
             <div
               id="listenWriteContentDom"

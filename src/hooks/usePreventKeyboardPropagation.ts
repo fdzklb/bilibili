@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 
+// 防止一些键盘事件冒泡，避免和b站的键盘快捷键冲突
 export function usePreventKeyboardPropagation(open: boolean) {
   useEffect(() => {
     if (!open) return

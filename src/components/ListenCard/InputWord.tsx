@@ -22,7 +22,6 @@ const InputWord: React.FC<InputWordProps> = ({ word, onChange, totalLength, inpu
 
   useEffect(() => {
     if (focusIndex === index) {
-      console.log("foucsIndex === index", focusIndex, index)
       inputRef.current.focus()
     }  
   }, [focusIndex, index])

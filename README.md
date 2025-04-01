@@ -16,9 +16,9 @@
 ## 🛠️ 技术栈
 
 - **框架:** React + TypeScript
-- **扩展框架:** Plasmo
-- **样式:** Tailwind CSS
-- **UI 组件:** Shadcn UI
+- **扩展框架:** [Plasmo](https://juejin.cn/post/7257520279312498748)
+- **样式:** [Tailwind CSS](https://www.tailwindcss.cn/docs/installation)
+- **UI 组件:** [Shadcn UI](https://www.shadcn-ui.cn/docs/installation)
 - **图标:** Lucide React
 
 ## 📁 项目结构
@@ -40,9 +40,13 @@
 └── tailwind.config.ts # tailwind配置文件
 └── tsconfig.json # tsconfig配置文件
 
+## 🚀 快速开始
 
-
-## 🚀 主要功能说明
+1. 克隆项目到本地
+2. 安装依赖: `yarn`
+3. 构建项目: `yarn dev` 生成开发包，将build/chrome-mv3-dev 文件夹安装到chrome浏览器的扩展程序内后
+4. 构建项目: `yarn buildbuild` 生成生产包，将build/chrome-mv3-prod 文件夹安装到chrome浏览器的扩展程序内
+![安装位置](./assets/md/image.png)
 
 ### 1. 字幕同步卡片
 - 实时同步字幕和视频进度

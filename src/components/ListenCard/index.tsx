@@ -11,10 +11,10 @@ import {
 import React, {useEffect, useRef, useState } from "react"
 
 export type ModesTypes = {
-  listenWriteMode: boolean
-  noteMode: boolean
-  showRaw: boolean
-  showTranslate: boolean
+  listenWriteMode: boolean // 是否开启听写模式
+  noteMode: boolean // 是否开启笔记模式
+  showRaw: boolean // 是否显示原文
+  showTranslate: boolean // 是否显示译文
 }
 
 // 获取字幕数据的函数
@@ -171,7 +171,7 @@ const ListenCard = ({ setShowCard, showCard }: ListenCardProps) => {
   return (
     showCard ? (
       <div className="fixed top-16 right-0 flex flex-col gap-2 w-[80vw] h-[calc(100vh-64px)] bg-[#FFFFF4] rounded-lg shadow-xl">
-        {/* 头部操作区域 */}
+        {/* 头部按钮操作区域 */}
         <Header
           modes={modes}
           setModes={setModes}
