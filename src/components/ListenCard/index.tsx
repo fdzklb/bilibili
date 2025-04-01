@@ -24,13 +24,13 @@ const getSubtitle = async (location: Location) => {
   return subtitles
 }
 
-type ListenSubtitleProps = {
+type ListenCardProps = {
   setShowCard: (showCard: boolean) => void
   showCard: boolean
 }
 
 // 主组件
-const ListenSubtitle = ({ setShowCard, showCard }: ListenSubtitleProps) => {
+const ListenCard = ({ setShowCard, showCard }: ListenCardProps) => {
   const [title, setTitle] = useState<string>("") //标题
   const [data, setData] = useState<dataListTypes>([]) //字幕数据
   const [loading, setLoading] = useState(true) //加载状态
@@ -160,14 +160,12 @@ const ListenSubtitle = ({ setShowCard, showCard }: ListenSubtitleProps) => {
       {
         description: "欢迎使用bilibili插件，有任何问题可以联系我！",
         author: 'fangdada',
-        email: '358646034@qq.com',
+        email: 'fangdada160@gmail.com',
         title: title,
         data: data.map((item) => ({ content: item.content, translateContent: item.translateContent, noteContent: item.noteContent }))
       },
       `${title}.docx`
     )
-    // if (docType === "DOC") {
-    // }
   }
 
   return (
@@ -210,5 +208,5 @@ const ListenSubtitle = ({ setShowCard, showCard }: ListenSubtitleProps) => {
   )
 }
 
-export default ListenSubtitle
+export default ListenCard
 

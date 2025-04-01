@@ -4,8 +4,6 @@ import { saveAs } from "file-saver"
 import JSZipUtils from "jszip-utils"
 import PizZip from "pizzip"
 import { twMerge } from "tailwind-merge"
-import type { dataListTypes } from "./util/getSubtitle"
-import type { DownloadType } from "@/components/ListenSubtitle/Header"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

@@ -1,12 +1,18 @@
 import { Button, Input, Textarea } from "@/components/ui"
-import type { ModesTypes } from "./index"
 import type { dataListTypes, dataTypes } from "@/lib/util/getSubtitle"
 import { ArrowLeft, ArrowRight, Copy, Eye, EyeOff } from "lucide-react"
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from "react"
 import { FixedSizeList } from "react-window"
 import activeImage from "url:~assets/icons/active.gif"
 
-import { Progress } from "./Progress"
+import type { ModesTypes } from "./index"
+import InputWord from "./InputWord"
 
 interface ListenSubtitleCardProps {
   loading: boolean
@@ -30,11 +36,41 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
   setData,
   modes
 }) => {
+  // 添加新的状态控制是否允许自动滚动
+  const [allowAutoScroll, setAllowAutoScroll] = useState(true)
+  const [focusIndex, setFocusIndex] = useState(null)
+
+  // 用于存储定时器ID
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
   const currentRowData: dataTypes = data[currentIndex]
   const totalLength = data.length
-
   const { listenWriteMode, noteMode } = modes
-
+  // const currentRawArr = currentRowData?.translateContent ? currentRowData?.translateContent?.split(" ") : []
+  const currentRawArr = currentRowData?.content
+    ? currentRowData?.content?.split(" ")
+    : []
+    console.log(currentRowData)
+  // 监听 Shift+ArrowLeft 快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.code === "ArrowLeft") {
+        e.preventDefault() // 阻止默认的 Shift+ArrowLeft 行为
+        if (currentIndex > 0) {
+          handleVideoChange("currentTime", currentIndex - 1)
+        }
+      }
+      if (e.shiftKey && e.code === "ArrowRight") {
+        e.preventDefault() // 阻止默认的 Shift+ArrowRight 行为
+        if (currentIndex < totalLength - 1) {
+          handleVideoChange("currentTime", currentIndex + 1)
+        }
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [currentIndex, handleVideoChange])
   const handleChange = (
     index: number,
     key: string,
@@ -49,11 +85,6 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
     setData(updateData)
   }
 
-  // 添加新的状态控制是否允许自动滚动
-  const [allowAutoScroll, setAllowAutoScroll] = useState(true)
-  // 用于存储定时器ID
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
-
   // 处理用户交互后的自动滚动恢复
   const handleUserInteraction = () => {
     setAllowAutoScroll(false)
@@ -67,34 +98,6 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
     timerRef.current = setTimeout(() => {
       setAllowAutoScroll(true)
     }, 5000)
-  }
-
-  const CopyAndHide = ({
-    content,
-    type
-  }: {
-    content: string
-    type: "showRaw" | "showTranslate"
-  }) => {
-    return content ? (
-      <div className="flex items-center gap-2 ml-2">
-        <button
-          // className="p-2 rounded-full hover:bg-gray-100"
-          onClick={() => handleChange(currentIndex, type, false)}>
-          <EyeOff className="h-4 w-4 text-gray-500 hover:text-primary" />
-        </button>
-        <button
-          onClick={() => {
-            navigator.clipboard.writeText(content)
-            // toast({
-            //   description: "已复制到剪贴板",
-            //   duration: 1500
-            // })
-          }}>
-          <Copy className="h-4 w-4 text-gray-500 hover:text-primary" />
-        </button>
-      </div>
-    ) : null
   }
 
   // 渲染每一行的组件
@@ -130,7 +133,9 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
           // 加载中显示骨架屏
           <div className="space-y-4 p-4">
             {[...Array(10)].map((_, i) => (
-              <div key={i} className="flex items-center justify-between animate-pulse">
+              <div
+                key={i}
+                className="flex items-center justify-between animate-pulse">
                 <div className="h-4 w-24 bg-gray-200 rounded"></div>
                 <div className="h-4 w-4 bg-gray-200 rounded-full"></div>
               </div>
@@ -170,103 +175,141 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
               handleVideoChange("currentTime", currentIndex - 1)
             }
           }}
+          title="快捷键:Shift+左箭头⬅"
           disabled={currentIndex === 0}>
           <ArrowLeft />
         </Button>
         <div className="text-lg px-10 py-4 space-y-4 flex flex-col align-middle flex-grow h-full">
           <div className="text-center mb-4 text-gray-600">
-            <span className="text-primary text-2xl">{currentIndex + 1}</span> /{" "}
+            <span className="text-primary text-xl">{currentIndex + 1}</span> /{" "}
             {totalLength}
           </div>
 
           {/* 内容区域 */}
           <div className="flex flex-col items-center space-y-4">
             {/* 原文部分 */}
-            <div className="min-h-16">
-              {" "}
+            <div className="">
               {/* 固定高度 */}
-              <div className="pl-4">
-                {currentRowData?.showRaw ? (
-                  <div className="min-h-[48px] flex items-center">
-                    <span>{currentRowData.content || "暂无原文"}</span>
-                    <CopyAndHide
-                      content={currentRowData.content || ""}
-                      type="showRaw"
-                    />
-                  </div>
-                ) : (
-                  <Button
-                    size="lg"
-                    onClick={() => {
-                      handleChange(currentIndex, "showRaw", true)
-                    }}>
-                    <div className="px-4 flex items-center gap-1">
-                      <Eye />
-                      点击显示原文
-                    </div>
-                  </Button>
-                )}
+              <div
+                className="pl-4"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleChange(
+                    currentIndex,
+                    "showRaw",
+                    !currentRowData?.showRaw
+                  )
+                }}>
+                <div className="min-h-[40px] flex cursor-pointer tems-center rounded-lg">
+                  <span
+                    className="text-base"
+                    style={
+                      currentRowData?.showRaw
+                        ? {}
+                        : {
+                            color: "transparent",
+                            textShadow: "#5a5656 0 0 11px"
+                          }
+                    }>
+                    {currentRowData?.content || "暂无原文(该视频作者未上传原文字幕)"}
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* 译文部分 */}
-            <div className="min-h-16">
-              {" "}
+            <div className="">
               {/* 固定高度 */}
-              <div className="pl-4">
-                {currentRowData?.showTranslate ? (
-                  <div className="min-h-[48px] flex items-center">
-                    <span>
-                      {currentRowData?.translateContent || "暂无译文"}
-                    </span>
-                    <CopyAndHide
-                      type="showTranslate"
-                      content={currentRowData?.translateContent || ""}
-                    />
-                  </div>
-                ) : (
-                  <Button
-                    size="lg"
-                    onClick={() => {
-                      handleChange(currentIndex, "showTranslate", true)
-                    }}>
-                    <div className="px-4 flex items-center gap-1">
-                      <Eye />
-                      点击显示示译文
-                    </div>
-                  </Button>
-                )}
+              <div
+                className="pl-4"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleChange(
+                    currentIndex,
+                    "showTranslate",
+                    !currentRowData?.showTranslate
+                  )
+                }}>
+                <div
+                  className={`min-h-[48px] flex items-center cursor-pointer rounded-lg ${
+                    currentRowData?.showTranslate
+                      ? ""
+                      : "backdrop-blur-md bg-white/30"
+                  }`}>
+                  <span
+                    className="text-base"
+                    style={
+                      currentRowData?.showTranslate
+                        ? {}
+                        : {
+                            color: "transparent",
+                            textShadow: "#5a5656 0 0 11px"
+                          }
+                    }>
+                    {currentRowData?.translateContent || "暂无译文(该视频作者未上传译文字幕)"}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
           {/* 用户输入区域 */}
           {listenWriteMode ? (
-            <div className={"flex items-center gap-2 flex-col w-full"}>
-              <Textarea
-                className="w-[80%] min-h-[60px]"
-                placeholder="请输入听到的内容..."
-                value={currentRowData?.listenWriteContent || ""}
-                onChange={(e) => {
-                  // 阻止事件冒泡
-                  e.stopPropagation()
-                  handleChange(
-                    currentIndex,
-                    "listenWriteContent",
-                    e.target.value
-                  )
-                }}
-                // 添加 onKeyDown 事件处理器来阻止键盘事件冒泡
-                onKeyDown={(e) => {
-                  e.stopPropagation()
-                }}
-              />
-              <div className="w-[80%]">
+            <div
+              id="listenWriteContentDom"
+              className={"flex flex-wrap gap-3  w-full"}>
+              {/* {
+                  currentRowData.
+                } */}
+              {currentRawArr.length ? (
+                currentRawArr.map((item, index) => (
+                  <InputWord
+                    setFocusIndex={setFocusIndex}
+                    focusIndex={focusIndex}
+                    word={item}
+                    key={`${item}-${index}`}
+                    index={index}
+                    totalLength={currentRawArr.length}
+                    inputValueArr={
+                      currentRowData?.listenWriteContent?.split(" ") || []
+                    }
+                    onChange={(value) =>
+                      handleChange(
+                        currentIndex,
+                        "listenWriteContent",
+                        value.join(" ")
+                      )
+                    }
+                  />
+                ))
+              ) : (
+                <div className="w-full flex justify-center">
+                  <Input
+                    className="w-[80%] min-h-[60px]"
+                    // placeholder="请输入听到的内容..."
+                    value={currentRowData?.listenWriteContent || ""}
+                    onChange={(e) => {
+                      // 阻止事件冒泡
+                      e.stopPropagation()
+                      handleChange(
+                        currentIndex,
+                        "listenWriteContent",
+                        e.target.value
+                      )
+                    }}
+                    // 添加 onKeyDown 事件处理器来阻止键盘事件冒泡
+                    onKeyDown={(e) => {
+                      e.stopPropagation()
+                    }}
+                  />
+                  {/* <div className="w-[80%]">
                 <Progress
                   inputValue={currentRowData?.listenWriteContent || ""}
                   targetValue={currentRowData?.content || ""}
                   height={4}
                 />
-              </div>
+              </div>  */}
+                </div>
+              )}
             </div>
           ) : null}
           {noteMode ? (
@@ -294,6 +337,7 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
               handleVideoChange("currentTime", currentIndex + 1)
             }
           }}
+          title="快捷键:Shift+右箭头➡"
           disabled={currentIndex === totalLength - 1}>
           <ArrowRight />
         </Button>
@@ -303,3 +347,6 @@ const ListenSubtitleCard: React.FC<ListenSubtitleCardProps> = ({
 }
 
 export default ListenSubtitleCard
+function useEffectLayout(arg0: () => void) {
+  throw new Error("Function not implemented.")
+}

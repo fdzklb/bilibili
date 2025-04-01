@@ -44,6 +44,19 @@ export default function Footer({
 
   const [playSpeed, setPlaySpeed] = useState("1")
 
+  // 监听 按键Shife控制是否循环播放
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') {
+        e.preventDefault()
+        setIsRepeat(!isRepeat)
+      }
+    } 
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  })
   const handleSpeed = (value: string) => {
     setPlaySpeed(value)
     handleVideoChange('playRate', parseFloat(value))
@@ -82,7 +95,7 @@ export default function Footer({
                     )}
                   </TooltipTrigger>
                   <TooltipContent side="top" align="center" style={{ zIndex: 2147483647 }}>
-                    是否循环播放
+                    是否循环播放(快捷键Shift)
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

@@ -7,7 +7,7 @@ import type {
   } from "plasmo"
   import React, { useEffect, useState } from "react"
   
-  import ListenSubtitleCard from "@/components/ListenSubtitle"
+  import ListenSubtitleCard from "@/components/ListenCard"
   import { fetchSubtitles, getAidOrBvid } from "@/lib/util/getSubtitle"
   import "../global.css"
   import { Button } from "@/components/ui"

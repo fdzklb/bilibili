@@ -7,7 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from "@/components/ui"
-import { cn, exportWordDocx } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
   DropdownMenuTrigger
@@ -40,8 +40,6 @@ interface HeaderProps {
 }
 
 export type DownloadType = "raw" | "translate" | "raw+translate" | "raw+note" | "translate+note" | "raw+translate+note"
-
-
 
 const Header: React.FC<HeaderProps> = ({ modes, setModes, setShowCard, handleDownload }) => {
 
@@ -82,50 +80,18 @@ const Header: React.FC<HeaderProps> = ({ modes, setModes, setShowCard, handleDow
               </div>
             ))}
           </div>
-          {/* <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button className="hover:bg-gray-200/50 p-2 rounded cursor-pointer">
-                  <div className="flex items-center">
-                    <Label className="text-gray-700">快捷键</Label>
-                    <Settings className="h-4 w-4 pl-1 text-gray-700" />
-                  </div>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="bottom"
-                align="end"
-                sideOffset={5}
-                style={{ zIndex: 2147483647 }}>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 px-1 py-0.5">
-                    <ArrowLeft className="h-4 w-4" /> 上一句
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ArrowRight className="h-4 w-4" /> 下一句
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ArrowUp className="h-4 w-4" /> 隐藏/显示原文
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ArrowDown className="h-4 w-4" /> 隐藏/显示译文
-                  </div>
-                  <div className="flex items-center gap-2">
-                    shift 开启/取消循环播放
-                  </div>
-                  <div className="flex items-center gap-2">
-                    space(空格) 播放/暂停
-                  </div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider> */}
         </div>
         <div className="flex items-center gap-4">
-          <DropdownMenu>
+          <Button
+            onClick={() => handleDownload("raw+translate+note", 'doc')}
+            className="h-6">
+            <span>下载(word格式)</span>
+            <Download className="h-4 w-4" />
+          </Button>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger>
               <Button className="h-6">
-                <span>下载</span>
+                <span>下载(word格式)</span>
                 <Download className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -135,24 +101,15 @@ const Header: React.FC<HeaderProps> = ({ modes, setModes, setShowCard, handleDow
                 { title: "译文", value: "translate" },
                 { title: "原文+译文", value: "raw+translate" },
                 { title: "原文+笔记", value: "raw+note" },
-                { title: "译文+笔记", value: "translate+note" },
                 { title: "原文+译文+笔记", value: "raw+translate+note" }
-              ].map((type) => (
-                <DropdownMenuSub key={type.value}>
-                  <DropdownMenuSubTrigger>{type.title}</DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
-                    {["PDF", "DOC", "vtt/srt"].map((docType) => (
-                      <DropdownMenuItem
-                        key={docType}
-                        onClick={() => handleDownload(type.value as DownloadType, docType)}>
-                        {docType}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
+              ].map((item) => (
+                <DropdownMenuItem
+                  onClick={() => handleDownload(item.value as DownloadType, 'doc')}>
+                  {item.title}
+                </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>

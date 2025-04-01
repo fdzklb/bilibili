@@ -1,17 +1,14 @@
+import React from "react"
 import styleText from "data-text:@/global.css"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
-import React from "react"
-
 import "../global.css"
 
-import ListenSubtitle from "@/components/ListenSubtitle"
-import { PauseCircle } from "lucide-react"
 
 // 配置content script
 export const config: PlasmoCSConfig = {
   matches: ["https://www.bilibili.com/video/*"], // 只在B站视频页面生效
-  all_frames: true,
-  run_at: "document_end"
+  all_frames: false,
+  run_at: "document_start"
 }
 
 export const getStyle: PlasmoGetStyle = () => {
@@ -24,7 +21,7 @@ export const getShadowHostId = () => {
   return "bilibili-subtitle"
 }
 
-export default function BiliSubtitle() {
+export default function BilibiliSubtitle() {
   const [isOpen, setIsOpen] = React.useState(false)
   const [showCard, setShowCard] = React.useState(true)
 
@@ -49,26 +46,6 @@ export default function BiliSubtitle() {
   }, [])
 
   return isOpen ? (
-     (
-      <><ListenSubtitle setShowCard={setShowCard} showCard={showCard} /><div
-        className="fixed right-0 top-1/2 transform -translate-y-1/2 hover:opacity-80 transition-opacity"
-        style={{ visibility: showCard ? "hidden" : "visible" }}
-        draggable="true"
-        onClick={() => {
-          setShowCard(true)
-        } }
-        onDragStart={(e) => {
-          e.dataTransfer.setData("text/plain", "")
-        } }
-        onDrag={(e) => {
-          if (!e.clientY) return
-          const element = e.target as HTMLElement
-          element.style.top = `${e.clientY}px`
-        } }>
-        <div className="bg-primary/80 text-white p-2 rounded-l-md shadow-lg cursor-pointer">
-          <PauseCircle className="w-6 h-6" />
-        </div>
-      </div></>
-    ) 
+    <div>123</div>
   ) : null
 }

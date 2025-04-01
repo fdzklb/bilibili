@@ -121,29 +121,59 @@ export type dataTypes = {
 }
 export type dataListTypes = dataTypes[]
 // 格式化字幕数据
-export function formatSubtitleData(data: rawDataTypes, timePerid: number = 8): dataListTypes {
+export function formatSubtitleData(
+  data: rawDataTypes,
+  timePerid: number = 8
+): dataListTypes {
   const { all_subtitles = [] } = data
   const [arr1, arr2] = all_subtitles
-  const translateArr = arr2?.body || []
-  const rawArr = arr1?.body || []
-  const merge = mergeArr(rawArr, translateArr, timePerid)
+
+  let isChineseOfArr1 = isChinese(
+    arr1?.body?.slice(0, 3).map((item) => item.content) || []
+  )
+  let isChineseOfArr2 = isChinese(
+    arr2?.body?.slice(0, 3).map((item) => item.content) || []
+  )
+  const translateArr = isChineseOfArr1
+    ? arr1?.body
+    : isChineseOfArr2
+      ? arr2?.body
+      : []
+  const rawArr = !isChineseOfArr1
+    ? arr1?.body
+    : !isChineseOfArr2
+      ? arr2?.body
+      : []
+  const newTranslateArr = translateArr.map((item) => ({
+    sid: item.sid,
+    from: item.from,
+    to: item.to,
+    translateContent: item.content
+  }))
+  const merge = mergeArr(rawArr || [], newTranslateArr || [], timePerid)
   return merge
 }
 
-const mergeArr = (rawArr: dataListTypes, translateArr: Pick<dataTypes, "from" | "to" | "content">[], timePerid: number = 7) => {
-  // 合并字幕片段 使合并后的片段时长在3-timePerid秒之间。
-  // 如果与要合并的片段出现1.5秒间隔，则认为下一个片段是新的一句话，不再合并下一段
+const mergeArr = (
+  rawArr: dataListTypes,
+  translateArr: Omit<dataTypes, "content">[],
+  timePerid: number = 7
+) => {
+  // 合并字幕片段 使合并后的片段时长在3-timePerid秒之间, 避免一句太短或者太长
+  // 但是如果下一个而片段出现1秒以上间隔，则很有可能下一个片段是新的一句话，则不再合并下一段
   const mergedArr: dataTypes[] = []
   let currentSegment: dataTypes | null = null
-
-  for (let i = 0; i < rawArr.length; i++) {
+  const isTranslate = (rawArr.length === 0 && translateArr.length > 0)
+  const realMergeArr = isTranslate ? translateArr : rawArr
+  for (let i = 0; i < realMergeArr.length; i++) {
     const current = {
-      ...rawArr[i],
+      content: '',
+      translateContent: '',
       showRaw: false,
       showTranslate: false,
       listenWriteContent: "",
       noteContent: "",
-      translateContent: ""
+      ...realMergeArr[i],
     }
 
     // 如果没有当前片段，将当前字幕作为新片段
@@ -155,19 +185,20 @@ const mergeArr = (rawArr: dataListTypes, translateArr: Pick<dataTypes, "from" | 
     const timeDiff = current.from - currentSegment.to
     const segmentDuration = currentSegment.to - currentSegment.from
 
-    // 如果时间间隔超过1.5秒或当前片段时长已超过timePerid秒，保存当前片段并开始新片段
-    if (timeDiff > 1.5 || segmentDuration > timePerid) {
+    // 如果时间间隔超过1秒或当前片段时长已超过timePerid秒，保存当前片段并开始新片段
+    if (timeDiff > 1 || segmentDuration > timePerid) {
       mergedArr.push(currentSegment)
       currentSegment = { ...current }
       continue
     }
 
-    // 如果当前片段时长小于timePerid秒且时间间隔小于1.5秒，合并片段
+    // 如果当前片段时长小于timePerid秒且时间间隔小于1秒，合并片段
     if (segmentDuration < timePerid) {
       currentSegment = {
         ...currentSegment,
         to: current.to,
-        content: `${currentSegment.content} ${current.content}`
+        content: `${currentSegment.content} ${current.content}`.trim(),
+        translateContent: `${currentSegment.translateContent} ${current.translateContent}`.trim(),
       }
       continue
     }
@@ -180,8 +211,8 @@ const mergeArr = (rawArr: dataListTypes, translateArr: Pick<dataTypes, "from" | 
   if (currentSegment) {
     mergedArr.push(currentSegment)
   }
-
-  if (translateArr.length === 0) return mergedArr
+  if (translateArr.length === 0 || mergedArr[0]?.translateContent.trim() !== "")
+    return mergedArr
   // 将合并后的片段与翻译片段合并，如果翻译片段的to和合并后的片段的to相差不过1秒
   // 则将翻译片段的content合并到合并后的片段的content中
   const newArr = []
@@ -191,7 +222,7 @@ const mergeArr = (rawArr: dataListTypes, translateArr: Pick<dataTypes, "from" | 
     for (let j = k; j < translateArr.length; j++) {
       const next = translateArr[j]
       if (next && next.to - current.to < 1) {
-        current.translateContent = `${current.translateContent}${next.content}`
+        current.translateContent = `${current.translateContent}${next.translateContent}`
       } else {
         k = j
         break
@@ -200,4 +231,28 @@ const mergeArr = (rawArr: dataListTypes, translateArr: Pick<dataTypes, "from" | 
     newArr.push(current)
   }
   return newArr
+}
+
+//判断是否是中文，一个字符串有超过一半是中文则返回true
+// 多条字符串有一半以上符合条件则返回true
+
+export function isChinese(strArr: string[]) {
+  let chineseStrCount = 0
+  for (let i = 0; i < strArr.length; i++) {
+    // 只保留str中中文和英语字母
+    let str = strArr[i].replace(/[^a-zA-Z\u4e00-\u9fa5]/g, "")
+    let count = 0
+    for (let j = 0; j < str.length; j++) {
+      if (/[\u4e00-\u9fa5]/.test(str[j])) {
+        count++
+        if (count > str.length / 2) {
+          chineseStrCount++
+          if (chineseStrCount > strArr.length / 2) {
+            return true
+          }
+        }
+      }
+    }
+  }
+  return false
 }

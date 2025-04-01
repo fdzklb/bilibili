@@ -1,20 +1,27 @@
 import { useEffect } from 'react'
 
-export function usePreventKeyboardPropagation() {
+export function usePreventKeyboardPropagation(open: boolean) {
   useEffect(() => {
+    if (!open) return
     const preventKeyboardPropagation = (e: KeyboardEvent) => {
       const keysToPrevent = [
-        'Space',
-        'ArrowLeft',
-        'ArrowRight',
+        // 'Space',
+        // 'ArrowLeft',
+        // 'ArrowRight',
         'ArrowUp',
         'ArrowDown',
-        'Shift'
+        'Shift',
+        'KeyF',
+        'KeyA',
+        'KeyD',
+        'KeyW',
+        'KeyE',
+        'KeyQ',
       ]
 
       if (keysToPrevent.includes(e.code)) {
         e.stopPropagation()
-        e.preventDefault()
+        // e.preventDefault()
       }
     }
 
@@ -27,5 +34,5 @@ export function usePreventKeyboardPropagation() {
       document.removeEventListener('keyup', preventKeyboardPropagation, true)
       document.removeEventListener('keypress', preventKeyboardPropagation, true)
     }
-  }, [])
+  }, [open])
 } 
