@@ -31,3 +31,7 @@ dist/
 
 # typescript
 .tsbuildinfo
+*.json
+*.lock
+*.yaml
+pnpm-lock.yaml
